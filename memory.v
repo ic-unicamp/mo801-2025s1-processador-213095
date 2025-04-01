@@ -1,26 +1,26 @@
 module memory(
-  input [31:0] address,
-  input [31:0] data_in,
-  output reg [31:0] data_out,
-  input we
+    input         clk,
+    input         we,
+    input  [31:0] a,
+    input  [31:0] wd,
+    output [31:0] rd
 );
 
-reg [31:0] mem[0:1024]; // 16KB de memória
-integer i;
-
-always @(address or data_in or we) begin
-  if (we) begin
-    mem[address] = data_in;
+  // Define a memory array with 64 words (32 bits each)
+  reg [31:0] RAM [0:63];
+  
+  // Initialize memory contents from the file "riscvtest.txt"
+  initial begin
+    $readmemh("memory.mem", RAM);
   end
-  data_out = mem[address[13:2]];
-end
 
+  // Read data from memory (word-aligned address)
+  assign rd = RAM[a[31:2]];
 
-initial begin
-  for (i = 0; i < 1024; i = i + 1) begin
-    mem[i] = 32'h00000000;
+  // Write to memory on the rising edge of the clock if write enable is asserted
+  always @(posedge clk) begin
+    if (we)
+      RAM[a[31:2]] <= wd;
   end
-  $readmemh("memory.mem", mem);
-end
 
 endmodule

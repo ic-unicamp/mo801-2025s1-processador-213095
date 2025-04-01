@@ -17,10 +17,7 @@ always @(posedge clk) begin
   we = 0;
   data_out = 32'h00000000;
 end
-
 endmodule
-
-
 
 module controller();
   // To do

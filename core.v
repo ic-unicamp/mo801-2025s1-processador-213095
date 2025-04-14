@@ -15,7 +15,7 @@
 `include "./datapath/extend.v"
 `include "./datapath/mux.v"
 `include "./datapath/regfile.v"
-`include "./datapath/memstage.v"
+`include "./datapath/memstager.v"
 
 // --- Control Component Includes ---
 `include "./control/control.v"

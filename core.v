@@ -15,11 +15,10 @@
 `include "./datapath/extend.v"
 `include "./datapath/mux.v"
 `include "./datapath/regfile.v"
-`include "./datapath/memstager.v"
+`include "./datapath/memstage.v"
 
 // --- Control Component Includes ---
-`include "./control/decoders.v"
-`include "./control/states.v"
+`include "./control/control.v"
 
 module core (
     input         clk,       // Clock signal
@@ -86,6 +85,7 @@ module core (
         .d(data_in),
         .q(mem_data_unstaged)
     );
+
     memstager memstager_inst (
         .data_in(mem_data_unstaged),
         .write_data(rd2_lat),      // Write data comes from latched register file output
@@ -199,7 +199,6 @@ module core (
     // selectors, memory control signals, register file write enable, and ALU op codes.
     wire         pc_write;      // Enables PC update
     wire         adr_src;       // Selects memory address source (PC vs. ALU result)
-    // Note: mem_write is connected directly as 'we' externally.
     wire         ir_write;      // Enables instruction register update
     wire  [1:0]  result_src;    // Selects the source for final result write-back
     wire  [3:0]  alu_control;   // Operation selector for the ALU
@@ -207,12 +206,11 @@ module core (
     wire  [1:0]  alu_src_b;     // Selects ALU input B source
     wire  [2:0]  imm_src;       // Immediate format selector (2:0)
     wire         reg_write;     // Enables register file write
-    wire  [1:0]  alu_op;        // High-level ALU operation selector
 
-    // Instantiate finite-state machine (FSM) for control signal generation.
-    // The FSM uses the instruction fields and ALU flags to determine the next state
-    // and to generate control signals.
-    fsm state_machine (
+
+    // Instantiate controller/finite-state machine
+    // Had to join the decoders and fsm because they were not working properly together
+    control controller (
         .clk(clk),
         .resetn(resetn),
         .opcode(instr[6:0]),
@@ -224,27 +222,13 @@ module core (
         .mem_write(we),      // External memory write enable
         .ir_write(ir_write),
         .result_src(result_src),
+        .alu_control(alu_control),
         .alu_src_b(alu_src_b),
         .alu_src_a(alu_src_a),
-        .reg_write(reg_write),
-        .alu_op(alu_op)
-    );
-    
-    // Instantiate ALU decoder: converts alu_op, opcode, funct3, and funct7 into a
-    // specific 4-bit ALU control signal.
-    alu_dec alu_decoder_inst (
-        .alu_op(alu_op),
-        .opcode(instr[6:0]),
-        .funct3(instr[14:12]),
-        .funct7(instr[31:25]),
-        .alu_control(alu_control)
-    );
-    
-    // Instantiate immediate decoder: converts the opcode into an immediate format
-    // selector for the immediate extension unit.
-    imm_dec imm_decoder_inst (
-        .opcode(instr[6:0]),
-        .imm_src(imm_src)
+        .imm_src(imm_src),
+        .reg_write(reg_write)
     );
 
+
 endmodule
+

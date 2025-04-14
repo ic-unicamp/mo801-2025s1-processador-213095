@@ -1,4 +1,11 @@
+# Ignore output files from tests
 test/*.out
+
+# Ignore the testbench executable
 tb
+
+# Ignore VCD files generated from simulation
 *.vcd
+
+# Ignore macOS system files
 .DS_Store

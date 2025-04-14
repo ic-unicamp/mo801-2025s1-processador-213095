@@ -1,33 +1,92 @@
-# Projeto de um processador RISC-V multiciclo
+# RISC-V Multicycle Processor
 
-Nesse projeto, os alunos desenvolverão um processador RISC-V simples multiciclo. A intenção principal é dominar questões básicas do desenvolvimento de hardware, como a definição de um conjunto de instruções, a implementação da máquina de estados de um processador multiciclo e a verificação do funcionamento do processador.
+![RISCV diagram](documentation/riscv_diagram.jpeg)
 
-## Objetivos
+This project implements a multicycle RISC-V processor based on the **RV32I** instruction set. It was developed as part of the **MO801** course at the **University of Campinas**, under Prof. **Rodolfo Jardim**. The processor is intended as an educational tool to explore foundational topics in computer architecture, including datapath design, control logic, instruction decoding, and finite state machines.
 
-1. Implementar um processador RISC-V simples multiciclo em Verilog sintetizável. 
-2. Implementar um conjunto de testes para verificar o funcionamento do processador.
-3. Executar programas implementados em C no processador.
+Each instruction executes over multiple clock cycles depending on its type and required resources.
 
-## Especificação
+**Name:** Andreis Purim (213095)
 
-Seu processador deve implementar as instruções RV32I, que é o conjunto mais simples de instruções RISC-V. A implementação deve ser multiciclo, ou seja, cada instrução pode levar um número diferente de ciclos de clock para ser executada. Você pode se inspirar na implementação multiciclo do livro "Computer Organization and Design" de David Patterson e John Hennessy.
+**Note:** Code comments and documentation were enhanced using GitHub Copilot and GPT to improve readability, modularity, and maintainability.
 
-Você pode utilizar um toolchain pronto ou montar o seu próprio toolchain ([dica de geração](https://github.com/riscv-collab/riscv-gnu-toolchain)). Alternativamente, para esse primeiro trabalho, você pode utilizar um [montador online](https://riscvasm.lucasteske.dev) (existem outros, fique à vontade para utilizar o que achar mais conveniente).
+---
 
-Como método de encerramento do programa, você pode utilizar a instrução *ebreak*, que encerra o simulador.
+## ✔️ Instructions Implemented
 
-Seu código deve ser sintetizávelvel, isso significa que deve ser possível gerar um circuito lógico a partir do seu código. A verificação será feita através do iverilog.
+The processor supports the **RV32I** base instruction set, as defined in the official [RISC-V ISA Manual (RV32I)](https://msyksphinz-self.github.io/riscv-isadoc/html/rvi.html):
 
-## Algumas informações extras
+- **R-type:** `ADD`, `SUB`, `SLL`, `SLT`, `SLTU`, `XOR`, `SRL`, `SRA`, `OR`, `AND`  
+- **I-type:** `ADDI`, `SLLI`, `SLTI`, `SLTIU`, `XORI`, `SRLI`, `SRAI`, `ORI`, `ANDI`  
+- **B-type / Control:** `BEQ`, `BNE`, `BLT`, `BGE`, `BLTU`, `BGEU`, `JAL`, `JALR`  
+- **S-type / Loads and Stores:** `LB`, `LH`, `LW`, `LBU`, `LHU`, `SB`, `SH`, `SW`  
+- **U-type:** `LUI`, `AUIPC`  
 
-* Você pode criar novos arquivos, o script de execução está configurado para compilar todos os arquivos .v presentes no diretório.
-* Vocë pode criar novos testes, utilize a nomenclatura dos arquivos da pasta *test*: Crie um arquivo testeNN.mem que contém o mapa de memória com as instruções a executar e os dados necessários; Crie um arquivo chamado saidaNN.ok que contém a saída experada do teste. O script run-all.sh irá executar cada um dos testes e também comparar com o arquivo de saída esperada.
-* Seu código está sendo simulado com o iverilog. É importante que seu código seja sintetizável.
-* Leia o arquivo de testbench (tb.v) para entender o funcionamento do teste, veja os comentários do arquivo. Em especial, merecem destaque: 1) Toda simulação começa com um reset; 2) A simulação pode parar se forem alcançadas 4000 unidades de tempo (2000 ciclos de clock) ou se a instrução *ebreak* for executada ou se for feito algum acesso à posição de memória 4092, que é a última palavra existente na memória declarada. Qualquer um desses métodos é suficiente para encerrar a simulação.
-* O testbench também monitora todos os acessos à memória que tiverem o bit 11 do endereço com valor 1. Esses acessos são impressos na tela.
+> WARNING: These instructions are implemented in hardware, though not all have been fully tested yet.
 
-## Entrega
+---
 
-Você deve entregar o seu projeto através do Github Classroom, bastando fazer um *commit* e *push* do seu código. os testes serão executados automaticamente. A data limite para entrega é o último dia do mês.
+## 🧪 Running the Project
 
-Seu código será avaliado com mais testes do que os que estão dispnoíveis aqui.
+1. **Install Icarus Verilog**  
+   Use `./setup.sh` or your system’s package manager (e.g., `apt`, `brew`) to install it.
+
+2. **Run Tests**  
+   Run `./run-all.sh` to compile and simulate all test cases in the `/test` directory.
+
+### Writing Your Own Tests
+
+- Create a `.mem` file (e.g., `teste01.mem`) containing the instruction/data memory image.
+- Add a corresponding `.ok` file (e.g., `saida01.ok`) with the expected output.
+- The test runner will compile and compare the simulation output automatically.
+
+To assemble RISC-V code into `.mem` format, you can use:
+
+- [riscv-gnu-toolchain](https://github.com/riscv-collab/riscv-gnu-toolchain) (full toolchain)
+- [riscvasm.lucasteske.dev](https://riscvasm.lucasteske.dev) (minimal web-based assembler – used in this project)
+
+---
+
+## 🧠 Understanding the Simulation
+
+Refer to `tb.v` (testbench) to understand the simulation flow:
+
+- The simulation resets at the beginning.
+- It terminates on any of the following:
+  - 4000 time units (2000 clock cycles)
+  - Execution of the `ebreak` instruction
+  - Access to memory address `0xFFC` (4092)
+- Any memory access where `address[11] == 1` is printed to the console.
+
+---
+
+## 📚 References
+
+### Documentation
+
+- [RISC-V Instruction Set Manual (RV32I)](https://msyksphinz-self.github.io/riscv-isadoc/html/rvi.html)  
+  The official and complete specification for RV32I instructions.
+
+- [Computer Organization and Design](https://ia601209.us.archive.org/24/items/ComputerOrganizationAndDesign3rdEdition/-computer%20organization%20and%20design%203rd%20edition.pdf)  
+  Patterson & Hennessy. A classic reference on multicycle processor design.
+
+### Reference Implementations
+
+- [Amirarsalan-sn/RISCV-multi-cycle-processor](https://github.com/Amirarsalan-sn/RISCV-multi-cycle-processor)  
+  Modular SystemVerilog-based multicycle processor.
+
+- [parhamsoltani/Multicycle_RISCV](https://github.com/parhamsoltani/Multicycle_RISCV)  
+  Verilog-based processor with microcoded control and detailed FSM logic.
+
+---
+
+## 🔧 TODO & Improvements
+
+- Improve `run.sh` and `run-all.sh` to produce clearer error messages.
+- Refactor `memstage.v` and `memory.v` for better modular separation.
+- Expand test coverage for, especially for conditionals, misaligned loads/stores and edge cases (overflow?)
+- Add full instruction test coverage with automated trace validation.
+
+---
+
+

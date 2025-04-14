@@ -1,0 +1,96 @@
+/*
+Test by Andreis Purim (213095)
+This should test almost all ALU functions, avoiding branches
+Each part is separated by a newline
+
+Part 1 1: Basic add and store
+    x1 = 0x0400
+    x1 = 0x0800 (store base)
+    x2 = 5
+    Store 5 at memory[0x0800]
+
+Part 2: Subtraction
+    x1 = 0x0400 
+    x1 = x1 + x1 = 0x0800 (store base)
+    x2 = 10
+    x3 = 3
+    Compute x4 = x2 - x3 (expected 7)
+    Store 7 at memory[0x0804]
+
+Part 3: Booleans
+    x2 = 0x041A
+    x3 = 0x0333
+    Compute x4 = x2 & x3 (expected 0x12)
+    Compute x5 = x2 | x3 (expected 0x73B)
+    Compute x6 = x2 ^ x3 (expected 0x729)
+    Store AND result at memory[0x0808] 
+    Store OR result at memory[0x0812]
+    Store XOR result at memory[0x0816]
+
+Part 4: Shifts
+    x2 = 8
+    x3 = 2 (shift amount)
+    Compute x4 = x2 << x3 (expected 0x20)
+    Compute x5 = x1 >> x3 (logical shift, expected 0x200)
+    Compute x6 = x1 >> x3 (arithmetic shift; same as logical for positive)
+    Store SLL result at memory[0x0820]
+    Store SRL result at memory[0x0824]
+    Store SRA result at memory[0x0828]
+
+
+
+addi x1, x0, 0x0400
+add  x1, x1, x1
+addi x2, x0, 5
+sw   x2, 0(x1)
+
+addi    x2, x0, 10
+addi    x3, x0, 3
+sub     x4, x2, x3
+sw      x4, 4(x1)
+
+addi    x2, x0, 0x041A
+addi    x3, x0, 0x0333
+and     x4, x2, x3
+or      x5, x2, x3
+xor     x6, x2, x3
+sw      x4, 8(x1)
+sw      x5, 12(x1)
+sw      x6, 16(x1)
+
+addi    x2, x0, 8
+addi    x3, x0, 2
+sll     x4, x2, x3
+srl     x5, x1, x3
+sra     x6, x1, x3
+sw      x4, 20(x1)
+sw      x5, 24(x1)
+sw      x6, 28(x1)
+
+j    0x0FFC
+*/
+40000093
+001080b3
+00500113
+0020a023
+00a00113
+00300193
+40310233
+0040a223
+41a00113
+33300193
+00317233
+003162b3
+00314333
+0040a423
+0050a623
+0060a823
+00800113
+00200193
+00311233
+0030d2b3
+4030d333
+0040aa23
+0050ac23
+0060ae23
+79d0006f

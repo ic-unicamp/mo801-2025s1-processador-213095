@@ -1,0 +1,36 @@
+/*
+Test by Andreis Purim (213095)
+This should test almost all ALU functions, avoiding branches
+Each part is separated by a newline
+
+Part 1: Set Less Than Operations
+    x1 = 0x0400
+    x1 = 0x0800 (store base)
+    x2 = 10
+    x3 = 20
+    Compute x4 = (x2 < x3) ? 1 : 0 (expected: 1)
+    Compute x5 = (x3 < x2) ? 1 : 0 (expected: 0)
+    Store x4 at memory[0x0800]
+    Store x5 at memory[0x0804]
+    End simulation
+
+addi    x1, x0, 0x0400
+add     x1, x1, x1
+addi    x2, x0, 10
+addi    x3, x0, 20
+slt     x4, x2, x3
+slt     x5, x3, x2
+sw      x4, 0(x1)
+sw      x5, 4(x1)
+j       0x0FFC
+*/
+
+40000093
+001080b3
+00a00113
+01400193
+00312233
+0021a2b3
+0040a023
+0050a223
+7dd0006f
